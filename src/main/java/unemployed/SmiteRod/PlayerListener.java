@@ -45,7 +45,7 @@ public class PlayerListener implements Listener {
         List<String> lore = itemMeta.getLore();
         if (!lore.contains(Config.instance.itemLore))
             return;
-        if (!player.hasPermission("smite.use") && !player.isOp()) {
+        if (!player.hasPermission("smiteRod.use")) {
             player.sendMessage(Config.instance.noPermission);
             return;
         }

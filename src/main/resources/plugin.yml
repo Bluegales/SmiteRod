@@ -1,8 +1,35 @@
-name: Smite
+name: SmiteRod
 version: ${project.version}
-main: unemployed.smite.Smite
+description: Create SmiteRods that strike lightning at the position you are looking at
+
+main: unemployed.SmiteRod.SmiteRod
 api-version: 1.16
 commands:
   smiteRod:
-    usage: /smiteRod
+    description: Generate SmiteRods
+    usage: |
+      /&lt;command&gt; <amount> [player]
+      Example: /&lt;command&gt; 1 - get a single SmiteRod
+      Example: /&lt;command&gt; 10 Bluegale - give Bluegale 10 SmiteRods
+      Example: /&lt;command&gt; infinite Bluegale - get an infinite SmiteRod
+
+permissions:
+  smiteRod.*:
+    description: Gives access to all SmiteRod commands
+    children:
+      smiteRod.use: true
+      smiteRod.give: true
+      smiteRod.infinite: true
+  smiteRod.use:
+    description: Allows the use of SmiteRods
+    default: true
+  smiteRod.give:
+    description: Allows creation of single use SmiteRods
+    default: op
+  smiteRod.infinite:
+    description: Allows creation of infinite use SmiteRods
+    default: op
+
+
+
 
