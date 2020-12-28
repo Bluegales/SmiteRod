@@ -1,0 +1,9 @@
+
+noPermission: "&cSorry, you don't have permission for this!"
+
+smiteRod:
+  item : "BLAZE_ROD"
+  displayname : "&cRod of Zeus"
+  lore : "&cLeft click to play Zeus!"
+  infinitelore : "infinite uses"
+  distance : 50

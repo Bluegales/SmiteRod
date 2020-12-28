@@ -1,0 +1,8 @@
+name: Smite
+version: ${project.version}
+main: unemployed.smite.Smite
+api-version: 1.16
+commands:
+  smiteRod:
+    usage: /smiteRod
+
