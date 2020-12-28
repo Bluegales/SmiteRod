@@ -1,9 +1,13 @@
 
 noPermission: "&cSorry, you don't have permission for this!"
+toFarAway: "That's to far away"
+toClose: "That's to close"
+useMessage: "By the power of Zeus"
 
 smiteRod:
   item : "BLAZE_ROD"
   displayname : "&cRod of Zeus"
   lore : "&cLeft click to play Zeus!"
-  infinitelore : "infinite uses"
-  distance : 50
+  infiniteLore : "infinite uses"
+  minDistance : 5
+  maxDistance : 30

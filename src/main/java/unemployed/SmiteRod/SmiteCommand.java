@@ -1,6 +1,7 @@
 package unemployed.SmiteRod;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +27,12 @@ public class SmiteCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
         switch (args.length) {
-            case 0:
-                sendHelp(sender);
-                return true;
             case 1:
             case 2:
-
                 ItemStack item;
 
                 if (args[0].equals("infinite")  || args[0].equals("i")) {
-                    if (!sender.hasPermission("smiteRod.infinite") && !sender.isOp()) {
+                    if (!sender.hasPermission("smiterod.give.infinite")) {
                         sender.sendMessage(Config.instance.noPermission);
                         return true;
                     }
@@ -47,12 +45,14 @@ public class SmiteCommand implements CommandExecutor {
                         sendHelp(sender);
                         return true;
                     }
-                    if (!sender.hasPermission("smiteRod.give") && !sender.isOp()) {
+                    if (!sender.hasPermission("smiterod.give.single")) {
                         sender.sendMessage(Config.instance.noPermission);
                         return true;
                     }
                     if (stackSize > 64)
                         stackSize = 64;
+                    if (stackSize < 1)
+                        stackSize = 1;
                     item = generateItem(false);
                     item.setAmount(stackSize);
                 }
@@ -92,14 +92,17 @@ public class SmiteCommand implements CommandExecutor {
         // Lore
         List<String> lores = new ArrayList<String>();
         lores.add(Config.instance.itemLore);
+        if (infinite)
+            lores.add(Config.instance.infiniteLore);
+        smiteItemMeta.setLore(lores);
         // Glow
         smiteItemMeta.addEnchant(Enchantment.WATER_WORKER, 70, true);
         smiteItemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        // Uses
-        if (infinite == true) {
-            lores.add(Config.instance.infiniteLore);
-        }
-        smiteItemMeta.setLore(lores);
+
+        // NBT tag
+        NamespacedKey key = new NamespacedKey(plugin, "smiterod");
+        int keyValue = (infinite) ? 1 : 0;
+        smiteItemMeta.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, keyValue);
 
         smiteItem.setItemMeta(smiteItemMeta);
         return smiteItem;

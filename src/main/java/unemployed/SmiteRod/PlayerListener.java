@@ -1,9 +1,6 @@
 package unemployed.SmiteRod;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,8 +9,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import java.util.List;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 public class PlayerListener implements Listener {
     private final SmiteRod plugin;
@@ -30,41 +27,53 @@ public class PlayerListener implements Listener {
         // Gets item from Config.
         Material smiteItem = Material.getMaterial(Config.instance.item);
 
-        if (e.getAction() != Action.RIGHT_CLICK_AIR)
+        if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
         ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (itemStack.getType() != smiteItem)
             return;
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if (!itemMeta.hasDisplayName())
-            return;
-        if (!itemMeta.getDisplayName().equalsIgnoreCase(Config.instance.itemName))
-            return;
-        if (!itemMeta.hasLore())
-            return;
-        List<String> lore = itemMeta.getLore();
-        if (!lore.contains(Config.instance.itemLore))
-            return;
-        if (!player.hasPermission("smite.use") && !player.isOp()) {
-            player.sendMessage(Config.instance.noPermission);
-            return;
-        }
-        Block targetblock = player.getTargetBlock(null, 50);
-        if (targetblock.isEmpty()){
-            player.sendMessage(ChatColor.GRAY + "To far away");
-            return;
-        }
-        Location smiteLocation = targetblock.getLocation();
-        if (player.getLocation().distance(smiteLocation) <= 5) {
-            player.sendMessage(ChatColor.GRAY + "Are you trying to kill yourself?");
-            return;
-        }
-        world.strikeLightning(smiteLocation);
-        player.sendMessage(ChatColor.GRAY + "By the power of Zeus!");
 
-        if (!lore.contains(Config.instance.infiniteLore)){
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        // Check NBT tag
+        NamespacedKey key = new NamespacedKey(plugin, "smiterod");
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        if(!container.has(key , PersistentDataType.INTEGER))
+            return;
+
+        boolean infinite = container.get(key, PersistentDataType.INTEGER) == 1;
+
+        // Check for permission
+        if (infinite) {
+            if (!player.hasPermission("smiterod.use.infinite")) {
+                player.sendMessage(Config.instance.noPermission);
+                return;
+            }
+        } else {
+            if (!player.hasPermission("smiterod.use.single")) {
+                player.sendMessage(Config.instance.noPermission);
+                return;
+            }
+        }
+
+        // Check distance
+        Block targetblock = player.getTargetBlock(null, Config.instance.maxDistance);
+        if (targetblock.isEmpty()){
+            player.sendMessage(Config.instance.toFarAway);
+            return;
+        }
+        if (targetblock.getLocation().distance(player.getLocation()) < Config.instance.minDistance)
+        {
+            player.sendMessage(Config.instance.toClose);
+            return;
+        }
+
+        world.strikeLightning(targetblock.getLocation());
+        if (!Config.instance.useMessage.isEmpty())
+            player.sendMessage(Config.instance.useMessage);
+
+        if (!infinite){
             itemStack.setAmount(itemStack.getAmount()-1);
-            //player.getInventory().removeItem(itemStack);
         }
     }
 }
